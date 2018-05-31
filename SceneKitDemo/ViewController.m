@@ -48,10 +48,26 @@
     [ship runAction:[SCNAction repeatActionForever:[SCNAction rotateByX:0 y:0 z:2 duration:0.8]]];
     
     // 添加渲染
-    SCNNode *node = [scnView.scene.rootNode childNodeWithName:@"MDL_OBJ_Model_0" recursively:YES];
-    node.geometry.firstMaterial.lightingModelName = SCNLightingModelBlinn;
-    node.geometry.firstMaterial.diffuse.contents = [UIImage imageNamed:@"Model_0.jpg"];
-    [scnView.scene.rootNode addChildNode:node];
+    if (NSFoundationVersionNumber >= NSFoundationVersionNumber10_0) {
+        // 经测试这种方式在10.0以下获取不到SCNNode对象
+        SCNNode *node = [scnView.scene.rootNode childNodeWithName:@"MDL_OBJ_Model_0" recursively:YES];
+        node.geometry.firstMaterial.lightingModelName = SCNLightingModelBlinn;
+        node.geometry.firstMaterial.diffuse.contents = [UIImage imageNamed:@"Model_0.jpg"];
+        [scnView.scene.rootNode addChildNode:node];
+    }
+    else {
+        [scnView.scene.rootNode childNodesPassingTest:^BOOL(SCNNode * _Nonnull child, BOOL * _Nonnull stop) {
+            if (child) {
+                child.geometry.firstMaterial.lightingModelName = SCNLightingModelBlinn;
+                child.geometry.firstMaterial.diffuse.contents = [UIImage imageNamed:@"Model_0.jpg"];
+                [scnView.scene.rootNode addChildNode:child];
+                return YES;
+            }
+            else {
+                return NO;
+            }
+        }];
+    }
     
     [self.view addSubview:scnView];
 }
